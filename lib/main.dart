@@ -1,5 +1,4 @@
 import 'package:flu_avm/config/config.dart';
-import 'package:flu_avm/presentation/screens/domus/domus_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,10 +10,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: AppTheme().getTheme(),
-      home: DomusScreen()
+      routerConfig: appRouter,
     );
   }
 }
