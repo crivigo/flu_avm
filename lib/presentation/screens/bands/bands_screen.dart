@@ -1,3 +1,4 @@
+import 'package:flu_avm/config/entities/band.dart';
 import 'package:flutter/material.dart';
 
 class BandsScreen extends StatelessWidget {
@@ -9,9 +10,24 @@ class BandsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Bandas'),
       ),
-      body: Center(
-        child: Text('Bands Screen Content'),
-      ),
+      body: ListView.builder(
+        itemCount: bands.length,
+        itemBuilder:(context, i){
+            return _bandTile(bands[i]);
+        }   
+      )
+      
     );
+  }
+
+  ListTile _bandTile(Band band) {
+    return ListTile(
+          leading: CircleAvatar(
+          child: Text(band.nomen.substring(0,2).toUpperCase()), 
+          ),
+          title: Text(band.nomen),
+          trailing: Text('${band.numerusVotum}', style: TextStyle(fontSize:20),),
+          onTap: () => print(band.nomen),
+          );
   }
 }
