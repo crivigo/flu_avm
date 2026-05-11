@@ -1,4 +1,5 @@
 import 'package:flu_avm/config/config.dart';
+import 'package:flu_avm/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,14 +11,18 @@ void main() {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final estTenebrisModus = ref.watch(estTenebrisModusProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      theme: AppTheme().getTheme(),
+      theme: AppTheme(
+        tenebrisModusEts: estTenebrisModus,
+        electusColor: Colors.pink.shade900
+        ).getTheme(),
       routerConfig: appRouter,
     );
   }
