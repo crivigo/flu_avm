@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/providers.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 class BandsScreen extends ConsumerWidget {
   const BandsScreen({super.key});
@@ -16,18 +17,78 @@ class BandsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Bandas'),
       ),
-      body: ListView.builder(
-        itemCount: bands.length,
-        itemBuilder:(context, i){
-            return _bandTile(context, ref,bands[i]);
-        }   
+      body: Column(
+        children: [
+          _videreData(bands),
+          
+          const SizedBox(height: 20,),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: bands.length,
+              itemBuilder:(context, i){
+                  return _bandTile(context, ref,bands[i]);
+              }   
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => addereNovumBand(context, ref),
+      floatingActionButton: Visibility(
+        visible: bands.length < 7? true : false, // Limitar a 10 bandas
+        child: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () => addereNovumBand(context, ref),
+        ),
       ),
     );
   }
+
+
+Widget _videreData( List<Band> bands ) {
+
+    // ignore: prefer_collection_literals
+  Map<String, double> dataMap = Map(); 
+
+  for (var band in bands) { 
+    dataMap.putIfAbsent(band.nomen, () => band.numerusVotum.toDouble() );
+  }
+
+  final List<Color> colorList = [
+    Colors.pink.shade100,
+    Colors.pink.shade300,
+    Colors.blue.shade200,
+    Colors.blue.shade600,
+    Colors.lightGreen.shade200,
+    Colors.lightGreen.shade600,
+  ];
+  
+  return dataMap.isNotEmpty ? Container(
+    padding: const EdgeInsets.only(left: 5, top: 5),
+    width: double.infinity,
+    height: 200.0,
+    child: PieChart(
+      dataMap: dataMap,
+      animationDuration: const Duration(milliseconds: 800),
+      colorList: colorList,
+      chartType: ChartType.ring,
+      legendOptions: const LegendOptions(
+        showLegendsInRow: false,
+        legendPosition: LegendPosition.right,
+        showLegends: true,
+        legendTextStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontFamily: "CupertinoSystemText", fontSize: 17,
+        ),
+      ),
+      chartValuesOptions: ChartValuesOptions(
+        showChartValues: dataMap.length <= 6, // con más de 6 no se ve el valor
+        showChartValueBackground: true,
+        showChartValuesInPercentage: false,
+        showChartValuesOutside: false,
+      ),
+    ),
+  ) : const LinearProgressIndicator();
+}
 
 Widget _bandTile(BuildContext context, WidgetRef ref, Band band) {
     return Dismissible(
