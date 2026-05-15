@@ -22,5 +22,13 @@ class Band {
       nomen: nomen ?? this.nomen,
       numerusVotum: numerusVotum ?? this.numerusVotum,
     );
-    }
+  }
+
+  factory Band.fromMap(Map<String, dynamic> obj) {
+    return Band(
+      id: obj['id'],
+      nomen: obj['nomen'],
+      numerusVotum: obj['numerusVotum'],
+    );
+  }
 }
