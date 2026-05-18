@@ -22,7 +22,7 @@ class BandsState {
     required this.socket,
   });
 
- copyWith({
+BandsState copyWith({
     ServerStatus? serverStatus,
     IO.Socket? socket,
     List<Band>? bands,
@@ -31,12 +31,16 @@ class BandsState {
     socket: socket ?? this.socket,
     bands: bands ?? this.bands,
   );
+
+  Band operator [](int other) {
+    return bands[other];
+  }
 }
 
 class BandsNotifier extends StateNotifier<BandsState> {
  BandsNotifier() : super(BandsState(
     serverStatus: ServerStatus.Connecting,
-    socket: IO.io('http://192.168.1.24', IO.OptionBuilder()
+    socket: IO.io('http://192.168.1.24:3000', IO.OptionBuilder()
     .setTransports(['websocket'])
     .enableAutoConnect()
     .build()
@@ -60,8 +64,36 @@ class BandsNotifier extends StateNotifier<BandsState> {
     state.socket.on('active-bands', (data) {
       final bands = (data as List).map((b) => Band.fromMap(b)).toList();
       state = state.copyWith(bands: bands);
+      }
+    );
+    state.socket.on('BANDS_LIST', (payload) {
+    final bands = (payload as List).map((b) => Band.fromMap(b)).toList();
+    state = state.copyWith(bands: bands);
     });
   }
+
+  void addereBand(String nomen) {
+    if (nomen.length > 1) {
+      state.socket.emit('ADD_BAND', {'nomen': nomen});
+
+    }
+  }
+
+  void delereBand(String id) {
+    
+      state.socket.emit('DELETE_BAND', {'id': id});
+
+    
+  }
+
+  void addereVotum(String id) {
+    
+      state.socket.emit('VOTE_BAND', {'id': id});
+    
+  }
+
+
+ 
 }
 
 

@@ -12,29 +12,41 @@ class BandsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bands = ref.watch(bandsProvider);
+
+final serverStatus  = ref.watch(bandsProvider).serverStatus;
+
+    final bandsState = ref.watch(bandsProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Bandas'),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            child: (serverStatus == ServerStatus.Online)
+                    ? const CircularProgressIndicator(color: Colors.yellow)
+                    : const Icon(Icons.offline_bolt, color: Colors.red
+            ),
+          )
+        ],
       ),
       body: Column(
         children: [
-          _videreData(bands),
+          _videreData(bandsState.bands),
           
           const SizedBox(height: 20,),
 
           Expanded(
             child: ListView.builder(
-              itemCount: bands.length,
+              itemCount: bandsState.bands.length,
               itemBuilder:(context, i){
-                  return _bandTile(context, ref,bands[i]);
+                  return _bandTile(context, ref,bandsState.bands[i]);
               }   
             ),
           ),
         ],
       ),
       floatingActionButton: Visibility(
-        visible: bands.length < 7? true : false, // Limitar a 10 bandas
+        visible: bandsState.bands.length < 7? true : false, // Limitar a 10 bandas
         child: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () => addereNovumBand(context, ref),
@@ -95,7 +107,7 @@ Widget _bandTile(BuildContext context, WidgetRef ref, Band band) {
       key: Key(band.id),
       direction: DismissDirection.startToEnd,
       onDismissed: (direction) {
-        ref.read(bandsProvider.notifier).delereBand(band);
+        ref.read(bandsProvider.notifier).delereBand(band.id);
       } ,
       background: Container(
         padding: EdgeInsets.only(left: 8.0),
@@ -110,7 +122,7 @@ Widget _bandTile(BuildContext context, WidgetRef ref, Band band) {
             title: Text(band.nomen),
             trailing: Text('${band.numerusVotum}', style: TextStyle(fontSize:20),),
             onTap: () {
-              ref.read(bandsProvider.notifier).addereVotum(band);
+              ref.read(bandsProvider.notifier).addereVotum(band.id);
             },
             ),
     );
@@ -153,7 +165,7 @@ addereNovumBand(BuildContext context, WidgetRef ref) {
           isDefaultAction: true,
           child: const Text('Add'),
           onPressed: () {
-            addereBandAdCollectione(context, ref, textumController.text);
+            ref.read( bandsProvider.notifier).addereBand(textumController.text);
             context.pop();
           }
         ),
@@ -165,18 +177,6 @@ addereNovumBand(BuildContext context, WidgetRef ref) {
       ],
    )
 );
-}
-void addereBandAdCollectione(BuildContext context, WidgetRef ref, String nomen){
-  
-  if(nomen.length > 1)
-  {
-  ref.read(bandsProvider.notifier).addereBand(
-    Band(id: DateTime.now().toString(), 
-    nomen: nomen, 
-    numerusVotum: 0)
-  );
-  }
-
 }
 
 }
