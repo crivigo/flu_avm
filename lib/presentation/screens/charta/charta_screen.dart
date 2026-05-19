@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
+
 class ChartaScreen extends ConsumerStatefulWidget {
   const ChartaScreen({super.key});
 
@@ -15,17 +16,43 @@ class _ChartaScreenState extends ConsumerState<ChartaScreen> {
 
   CircleAnnotationManager? _circleAnnotationManager; 
 
+  Cancelable? _dragCancelable;
+
 void _initiareCircleAnnotations(MapboxMap mapboxMap) {
     mapboxMap.annotations.createCircleAnnotationManager().then((manager) {
       _circleAnnotationManager = manager;
+
+      _setupDragListener(manager);
       _addereVelRenovaMarker();
     });
+  }
+
+
+  void _setupDragListener(CircleAnnotationManager manager) {
+
+
+     _dragCancelable?.cancel(); 
+
+    _dragCancelable = manager.dragEvents(
+        onChanged: (CircleAnnotation annotation) {
+          final pos = annotation.geometry.coordinates;
+          ref.read(coordsMarkerProvider.notifier).state = pos;
+        },
+        onEnd: (CircleAnnotation annotation) {
+          final pos = annotation.geometry.coordinates;
+          ref.read(coordsMarkerProvider.notifier).state = pos;
+        }
+
+    );
+   
   }
 
   Future<void> _addereVelRenovaMarker() async {
     final manager = _circleAnnotationManager;
 
     if (manager == null) return;
+
+    await manager.deleteAll();
 
     final placed = ref.read(markerPositumProvider);
 
@@ -36,7 +63,7 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
 
      ref.read(markerPositumProvider.notifier).state = true;
 
-    final situs = Position(-122.467895, 37.7749);
+    final situs = ref.read(coordsMarkerProvider);
     
      final color = ref.read(formColorProvider);
 
@@ -55,12 +82,18 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
     }
   }
 
+@override
+  void dispose() {
+    _dragCancelable?.cancel();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
 
     ref.listen<bool>(markerPositumProvider, (prev, next) {
-      if (prev != next) {
+      if (next == true) {
         _addereVelRenovaMarker();
       }
     });
@@ -76,21 +109,22 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
               key: const ValueKey('main_map'),
               cameraOptions:  CameraOptions(
                 center: Point(
-                  coordinates: Position(
-                    -122.467895, // Longitud
-                    37.7749,    // Latitud
-                  ),
+                  coordinates: initialisMarkerPositio,
                 ),
                 zoom: 12.0,
               ),
               styleUri: MapboxStyles.MAPBOX_STREETS,
               onMapCreated: _initiareCircleAnnotations
             ),
-        const Align(
+         Align(
           alignment: Alignment.topRight,
           child: Padding(
             padding: EdgeInsets.all(12.0),
-            child: ComplereForm()
+            child: ref.watch(markerPositumProvider) ? InformaUsoris(
+              nomen: ref.watch(formNomenProvider),
+              color: ref.watch(formColorProvider),
+              position: ref.watch(coordsMarkerProvider)
+            ) : ComplereForm(),
           ),
         )
         ],
