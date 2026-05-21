@@ -1,12 +1,32 @@
 // ignore: unused_import
-import 'dart:ui';
+import 'dart:async';
 
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import '../config/config.dart';
+
+// Contrato Socket.IO con el backend:
+// - Cliente emite 'CLIENT_REGISTER': { nomen, color (hex), lng, lat }
+// - Cliente emite 'CLIENT_MOVE': { lng, lat }
+// - Servidor emite 'CLIENT_JOINED': { id, nomen, color, lng, lat }
+// - Servidor emite 'CLIENT_LEFT': { id }
+// - Servidor emite 'CLIENT_MOVED': { id, lng, lat }
+// - Servidor emite 'GET_CLIENTS': [ { id, nomen, color, lng, lat }, ... ]
+
+
 
 
 class ChartaServices {
   IO.Socket? _socket;
 
+  final Map<String, Usor> _usores = {};
+
+  late final StreamController<List<Usor>> _usoresController;
+
+  ChartaServices() {
+    _usoresController = StreamController<List<Usor>>.broadcast();
+  }
   
   void conectare() {
     _socket = IO.io('http://192.168.1.24:3200', 
@@ -18,20 +38,36 @@ class ChartaServices {
 
     _socket!.onConnect((_) {
       _socket!.on('CLIENT_JOINED', (payload){
-        //TODO: ______________
+        final usor = Usor.fromJson(Map<String, dynamic>.from(payload));
+        _usores[usor.id] = usor;
 
+        _usoresListenRenovare();
       });
 
       _socket!.on('CLIENT_LEFT', (payload){
-        //TODO: ______________
+        final id = payload['id'] as String;
+        _usores.remove(id);
+        _usoresListenRenovare();
       });
 
       _socket!.on('CLIENT_MOVED', (payload){
-        //TODO: ______________
+        final map = Map<String, dynamic>.from(payload);
+        final id = map['id'] as String; //? ?? ''
+        final lat = map['lat'] as double; //? ?? 0.0;
+        final lng = map['lng'] as double; //? ?? 0.0;
+
+        _usores[id]= _usores[id]!.copyWith(positio: Position(lng, lat));
+        _usoresListenRenovare();
       });
 
       _socket!.on('GET_CLIENTS', (payload){
-        //TODO: ______________
+
+        _usores.clear();
+        for (final item in payload) {
+          final usor = Usor.fromJson(item);
+          _usores[usor.id] = usor;
+        }
+        _usoresListenRenovare();
       });
 
     });
@@ -39,10 +75,17 @@ class ChartaServices {
   _socket!.connect();
   }
 
+  void _usoresListenRenovare() {
+    _usoresController.add(List.from(_usores.values));
+  }
+
   void finire() {
     _socket!.disconnect();
     _socket?.dispose();
     _socket = null;
+    _usores.clear();
+    _usoresController.add([]);
+    _usoresController.close();
   }
 
 }
