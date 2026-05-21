@@ -1,7 +1,7 @@
 // ignore: unused_import
 import 'dart:async';
 
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+//import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../config/config.dart';

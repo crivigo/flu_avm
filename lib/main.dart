@@ -2,13 +2,14 @@ import 'package:flu_avm/config/config.dart';
 import 'package:flu_avm/presentation/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+//import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  MapboxOptions.setAccessToken(mapboxAccessToken);
+  // TEMPORAL: desactivado para web
+  //MapboxOptions.setAccessToken(mapboxAccessToken);
   
 
   runApp(
