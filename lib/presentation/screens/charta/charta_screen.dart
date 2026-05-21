@@ -1,3 +1,4 @@
+import 'package:flu_avm/config/helpers/coloris_forma.dart';
 import 'package:flu_avm/presentation/providers/charta_provider.dart';
 import 'package:flu_avm/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -29,22 +30,23 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
 
 
   void _setupDragListener(CircleAnnotationManager manager) {
-
-
      _dragCancelable?.cancel(); 
+
+     final socketService = ref.read(socketServiceProvider);
 
     _dragCancelable = manager.dragEvents(
         onChanged: (CircleAnnotation annotation) {
           final pos = annotation.geometry.coordinates;
           ref.read(coordsMarkerProvider.notifier).state = pos;
+
+          socketService.mitterePosition(pos);
         },
         onEnd: (CircleAnnotation annotation) {
           final pos = annotation.geometry.coordinates;
           ref.read(coordsMarkerProvider.notifier).state = pos;
+          socketService.mitterePosition(pos);
         }
-
     );
-   
   }
 
   Future<void> _addereVelRenovaMarker() async {
@@ -56,13 +58,7 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
 
     final placed = ref.read(markerPositumProvider);
 
-    if (!placed) {
-      await manager.deleteAll();
-      return;
-    }
-
-     ref.read(markerPositumProvider.notifier).state = true;
-
+  if(placed){
     final situs = ref.read(coordsMarkerProvider);
     
      final color = ref.read(formColorProvider);
@@ -78,9 +74,44 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
     try {
     await manager.create(optiones);
     } catch (e) {
-      debugPrint('Error al crear la anotación: $e');
+      debugPrint('Error al crear marcador: $e');
     }
   }
+
+  final aliiRudi = ref.read(aliiUsoresProvider).value ?? [];
+
+  final meusId = ref.read(socketServiceProvider).meusSocketId;
+
+  final alii =() => aliiRudi.where((u) => u.id != meusId).toList();
+
+  for (final usor in alii()) {
+      final usorColor = adHexExColor(usor.colorhex);
+
+      final aliaoptiones = CircleAnnotationOptions(
+      geometry: Point(coordinates: usor.positio),
+      circleColor: usorColor.toARGB32(),
+      circleRadius: 14.0,
+      circleStrokeColor: Colors.white.toARGB32(),
+      isDraggable: false
+      );
+    try {
+    await manager.create(aliaoptiones);
+    } catch (e) {
+      debugPrint('Error al crear marcador de otros usuarios: $e');  
+    }
+    }
+  }
+
+  //  Future<void> _conectare() async {
+  //   final socketService = ref.read(socketServiceProvider);
+
+  //   socketService.conectare();
+
+  //   socketService.usoresStream.listen((usores) {
+  //     // Aquí puedes manejar la lista de usores actualizada
+  //     // Por ejemplo, podrías actualizar el estado de tu aplicación o realizar otras acciones necesarias
+  //   });
+  // }
 
 @override
   void dispose() {
@@ -93,7 +124,13 @@ void _initiareCircleAnnotations(MapboxMap mapboxMap) {
   Widget build(BuildContext context) {
 
     ref.listen<bool>(markerPositumProvider, (prev, next) {
-      if (next == true) {
+      //if (next == true) 
+        _addereVelRenovaMarker();
+      
+    });
+
+    ref.listen(aliiUsoresProvider, (prev, next){
+      if (next.value != null) {
         _addereVelRenovaMarker();
       }
     });
