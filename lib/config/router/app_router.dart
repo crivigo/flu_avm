@@ -37,8 +37,8 @@ final appRouter = GoRouter(
         // GoRoute(
     ),
     GoRoute(
-      path: '/siiii',
-      builder: (context, state) => SiiiiScreen(),
+      path: '/iconacos',
+      builder: (context, state) => IconacosScreen(),
     ),
   ]
 ); 

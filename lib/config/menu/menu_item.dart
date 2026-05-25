@@ -40,9 +40,9 @@ const appMenuItems = <MenuItem>[
     icon: Icons.catching_pokemon
   ),
    MenuItem(
-    titulus: 'Siiii',
+    titulus: 'Iconacos',
     subtitulus: 'Mi menu item',
-    link: '/siiii',
+    link: '/iconacos',
     icon: Icons.punch_clock
   ),
 ];
