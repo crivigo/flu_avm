@@ -3,7 +3,7 @@ class Pokemon{
   final String nomen;
   final int altitudo;
   final int pondus;
-  final List<String> faculfates;
+  final List<String> facultates;
   final String? faciemImaginem;
 
   Pokemon({
@@ -11,7 +11,7 @@ class Pokemon{
     required this.nomen,
     required this.altitudo,
     required this.pondus,
-    required this.faculfates,
+    required this.facultates,
     this.faciemImaginem
   });
 
