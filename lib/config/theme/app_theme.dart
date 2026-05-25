@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   final Color electusColor;
@@ -18,6 +19,12 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: false,
       ),
+
+      textTheme:  TextTheme(
+        titleLarge: GoogleFonts.montserratAlternates(
+          
+        ),
+      )
     );
     
   }
