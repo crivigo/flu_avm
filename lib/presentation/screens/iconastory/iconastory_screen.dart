@@ -1,6 +1,7 @@
 ﻿import 'package:flu_avm/presentation/providers/iconastory_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class IconaStoryScreen extends ConsumerStatefulWidget {
   const IconaStoryScreen({super.key});
@@ -22,12 +23,15 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(iconaStoryProvider);
-    final notifier = ref.read(iconaStoryProvider.notifier);
+    final state = ref.watch(historiconicaProvider);
+    final notifier = ref.read(historiconicaProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IconaStory'),
+        title: Text(
+          'Histori\u00f3nica',
+          style: GoogleFonts.anton(fontSize: 22, letterSpacing: 1),
+        ),
         actions: [
           if (state.phase != GamePhase.start)
             IconButton(
@@ -57,7 +61,9 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
           ),
         GamePhase.voting => _VotingView(
             state: state,
-            onVote: notifier.castVote,
+            onAddVote: notifier.addVote,
+            onRemoveVote: notifier.removeVote,
+            onNext: notifier.nextPhrase,
           ),
         GamePhase.results => _ResultsView(
             state: state,
@@ -80,12 +86,9 @@ class _IconsRow extends StatelessWidget {
       spacing: 16,
       runSpacing: 12,
       alignment: WrapAlignment.center,
-      children: icons.map((e) {
-        return Tooltip(
-          message: e.key,
-          child: Icon(e.value, size: iconSize),
-        );
-      }).toList(),
+      children: icons
+          .map((e) => Tooltip(message: e.key, child: Icon(e.value, size: iconSize)))
+          .toList(),
     );
   }
 }
@@ -103,19 +106,28 @@ class _StartView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Icon(Icons.auto_stories_outlined, size: 80),
-          const SizedBox(height: 24),
-          const Text(
-            'IconaStory',
+          const SizedBox(height: 20),
+          Text(
+            'Histori\u00f3nica',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            style: GoogleFonts.anton(fontSize: 40, letterSpacing: 2),
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Aparecen unos iconos.\nCada jugador escribe una frase que los represente.\nLuego todos votan quien escribio cada frase.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, height: 1.5),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'Aparecen unos iconos. Cada jugador escribe la frase que le inspiran.\n\n'
+              'Despues todos votan quien escribio cada frase. Puedes votar varias veces al mismo jugador.\n\n'
+              'Gana el jugador cuya frase menos gente identifica como suya.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, height: 1.6),
+            ),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 40),
           FilledButton.icon(
             onPressed: onStart,
             icon: const Icon(Icons.casino_outlined),
@@ -128,7 +140,7 @@ class _StartView extends StatelessWidget {
 }
 
 class _ShowingIconsView extends StatelessWidget {
-  final IconaStoryState state;
+  final HistoriconicaState state;
   final VoidCallback onAddPhrase;
   final VoidCallback onFinish;
 
@@ -148,12 +160,12 @@ class _ShowingIconsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 16),
-          const Text(
-            'Estos son los iconos de la ronda',
+          Text(
+            'Iconos de la ronda',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: GoogleFonts.anton(fontSize: 20, letterSpacing: 1),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
           _IconsRow(icons: state.icons, iconSize: 64),
           const Spacer(),
           if (phraseCount > 0) ...[
@@ -165,7 +177,7 @@ class _ShowingIconsView extends StatelessWidget {
               ),
               child: Text(
                 '$phraseCount frase${phraseCount == 1 ? '' : 's'} '
-                'añadida${phraseCount == 1 ? '' : 's'}',
+                'a\u00f1adida${phraseCount == 1 ? '' : 's'}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -178,7 +190,7 @@ class _ShowingIconsView extends StatelessWidget {
           FilledButton.icon(
             onPressed: onAddPhrase,
             icon: const Icon(Icons.add_comment_outlined),
-            label: const Text('Añadir frase'),
+            label: const Text('A\u00f1adir frase'),
           ),
           if (phraseCount > 0) ...[
             const SizedBox(height: 12),
@@ -220,10 +232,10 @@ class _AddPhraseView extends StatelessWidget {
           const SizedBox(height: 8),
           _IconsRow(icons: icons, iconSize: 40),
           const SizedBox(height: 24),
-          const Text(
-            'Escribe tu frase para estos iconos',
+          Text(
+            'Tu frase para estos iconos',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            style: GoogleFonts.anton(fontSize: 18, letterSpacing: 1),
           ),
           const SizedBox(height: 20),
           TextField(
@@ -260,10 +272,7 @@ class _AddPhraseView extends StatelessWidget {
             label: const Text('Guardar frase'),
           ),
           const SizedBox(height: 12),
-          TextButton(
-            onPressed: onCancel,
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: onCancel, child: const Text('Cancelar')),
         ],
       ),
     );
@@ -271,10 +280,17 @@ class _AddPhraseView extends StatelessWidget {
 }
 
 class _VotingView extends StatelessWidget {
-  final IconaStoryState state;
-  final void Function(String alias) onVote;
+  final HistoriconicaState state;
+  final void Function(String alias) onAddVote;
+  final void Function(String alias) onRemoveVote;
+  final VoidCallback onNext;
 
-  const _VotingView({required this.state, required this.onVote});
+  const _VotingView({
+    required this.state,
+    required this.onAddVote,
+    required this.onRemoveVote,
+    required this.onNext,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +298,8 @@ class _VotingView extends StatelessWidget {
     final current = state.currentVotingIndex + 1;
     final phrase = state.currentVotingPhrase!;
     final aliases = state.allAliases;
+    final currentVotes = state.currentPhraseVotes;
+    final isLast = state.currentVotingIndex == total - 1;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -296,9 +314,9 @@ class _VotingView extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondary,
             ),
           ),
+          const SizedBox(height: 12),
+          _IconsRow(icons: state.icons, iconSize: 36),
           const SizedBox(height: 16),
-          _IconsRow(icons: state.icons, iconSize: 40),
-          const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -311,20 +329,63 @@ class _VotingView extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
             ),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Quien escribio esta frase?',
+          const SizedBox(height: 20),
+          Text(
+            'Votad quien la escribi\u00f3',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            style: GoogleFonts.anton(fontSize: 17, letterSpacing: 1),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Cada jugador vota. Se puede votar varias veces al mismo.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
           const SizedBox(height: 16),
-          ...aliases.map((alias) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: OutlinedButton(
-                  onPressed: () => onVote(alias),
-                  child: Text(alias, style: const TextStyle(fontSize: 16)),
-                ),
-              )),
+          ...aliases.map((alias) {
+            final count = currentVotes.where((v) => v == alias).length;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => onAddVote(alias),
+                      child: Text(alias, style: const TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  if (count > 0) ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => onRemoveVote(alias),
+                      child: Chip(
+                        label: Text(
+                          '$count',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary,
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            onPressed: onNext,
+            icon: Icon(isLast ? Icons.bar_chart : Icons.arrow_forward),
+            label: Text(isLast ? 'Ver resultados' : 'Siguiente frase'),
+          ),
         ],
       ),
     );
@@ -332,101 +393,161 @@ class _VotingView extends StatelessWidget {
 }
 
 class _ResultsView extends StatelessWidget {
-  final IconaStoryState state;
+  final HistoriconicaState state;
   final VoidCallback onReset;
 
   const _ResultsView({required this.state, required this.onReset});
 
   @override
   Widget build(BuildContext context) {
-    final phrases = state.phrases;
-    final votes = state.votes;
     final colorScheme = Theme.of(context).colorScheme;
-
-    int correct = 0;
-    for (var i = 0; i < phrases.length; i++) {
-      if (votes[i] == phrases[i].alias) correct++;
-    }
+    final scores = state.correctGuessesPerPlayer;
+    final winnerList = state.winners;
+    final sortedAliases = state.allAliases
+      ..sort((a, b) => (scores[a] ?? 0).compareTo(scores[b] ?? 0));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.emoji_events_outlined, size: 64),
-          const SizedBox(height: 12),
-          const Text(
+          Text(
             'Resultados',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            style: GoogleFonts.anton(fontSize: 36, letterSpacing: 2),
           ),
-          const SizedBox(height: 6),
-          Text(
-            '$correct de ${phrases.length} acertadas',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: colorScheme.secondary,
-              fontWeight: FontWeight.w500,
+          const SizedBox(height: 8),
+          _IconsRow(icons: state.icons, iconSize: 32),
+          const SizedBox(height: 20),
+          if (winnerList.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    winnerList.length == 1 ? '\ud83c\udfc6 Ganador' : '\ud83c\udfc6 Empate',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    winnerList.join(' y '),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.anton(
+                      fontSize: 26,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  Text(
+                    'Menos adivinados: ${scores[winnerList.first]} voto${scores[winnerList.first] == 1 ? '' : 's'} correctos',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 16),
+          ],
+          Text(
+            'Clasificaci\u00f3n',
+            style: GoogleFonts.anton(fontSize: 18, letterSpacing: 1),
           ),
-          const SizedBox(height: 24),
-          _IconsRow(icons: state.icons, iconSize: 36),
-          const SizedBox(height: 24),
-          ...List.generate(phrases.length, (i) {
-            final phrase = phrases[i];
-            final voted = votes[i];
-            final isCorrect = voted == phrase.alias;
+          const SizedBox(height: 8),
+          ...sortedAliases.map((alias) {
+            final isWinner = winnerList.contains(alias);
+            final score = scores[alias] ?? 0;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: isWinner
+                    ? colorScheme.primaryContainer
+                    : colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  if (isWinner) const Text('\ud83c\udfc6 ', style: TextStyle(fontSize: 18)),
+                  Expanded(
+                    child: Text(
+                      alias,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isWinner
+                            ? colorScheme.onPrimaryContainer
+                            : colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$score voto${score == 1 ? '' : 's'} correcto${score == 1 ? '' : 's'}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isWinner
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 20),
+          Text(
+            'Detalle por frase',
+            style: GoogleFonts.anton(fontSize: 18, letterSpacing: 1),
+          ),
+          const SizedBox(height: 8),
+          ...List.generate(state.phrases.length, (i) {
+            final phrase = state.phrases[i];
+            final phraseVotes = state.votes[i];
+            final correctCount =
+                phraseVotes.where((v) => v == phrase.alias).length;
 
             return Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isCorrect
-                    ? colorScheme.primaryContainer
-                    : colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(14),
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        isCorrect ? Icons.check_circle : Icons.cancel,
-                        color: isCorrect
-                            ? colorScheme.onPrimaryContainer
-                            : colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '"${phrase.phrase}"',
-                          style: TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 15,
-                            color: isCorrect
-                                ? colorScheme.onPrimaryContainer
-                                : colorScheme.onErrorContainer,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '"${phrase.phrase}"',
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 15,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  _ResultRow(
-                    label: 'Escrita por',
-                    value: phrase.alias,
-                    color: isCorrect
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onErrorContainer,
+                  const SizedBox(height: 6),
+                  Text(
+                    'Escrita por: ${phrase.alias}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
-                  _ResultRow(
-                    label: 'Votado',
-                    value: voted ?? '-',
-                    color: isCorrect
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onErrorContainer,
+                  const SizedBox(height: 4),
+                  Text(
+                    phraseVotes.isEmpty
+                        ? 'Sin votos'
+                        : 'Votos: ${phraseVotes.join(', ')} ($correctCount correcto${correctCount == 1 ? '' : 's'})',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.secondary,
+                    ),
                   ),
                 ],
               ),
@@ -440,37 +561,6 @@ class _ResultsView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
         ],
-      ),
-    );
-  }
-}
-
-class _ResultRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _ResultRow({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 2),
-      child: RichText(
-        text: TextSpan(
-          style: TextStyle(fontSize: 13, color: color),
-          children: [
-            TextSpan(
-              text: '$label: ',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            TextSpan(text: value),
-          ],
-        ),
       ),
     );
   }

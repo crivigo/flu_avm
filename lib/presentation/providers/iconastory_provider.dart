@@ -11,14 +11,14 @@ class PhraseEntry {
 
 enum GamePhase { start, showingIcons, addingPhrase, voting, results }
 
-class IconaStoryState {
+class HistoriconicaState {
   final GamePhase phase;
   final List<MapEntry<String, IconData>> icons;
   final List<PhraseEntry> phrases;
   final int currentVotingIndex;
-  final List<String?> votes;
+  final List<List<String>> votes;
 
-  const IconaStoryState({
+  const HistoriconicaState({
     this.phase = GamePhase.start,
     this.icons = const [],
     this.phrases = const [],
@@ -26,14 +26,14 @@ class IconaStoryState {
     this.votes = const [],
   });
 
-  IconaStoryState copyWith({
+  HistoriconicaState copyWith({
     GamePhase? phase,
     List<MapEntry<String, IconData>>? icons,
     List<PhraseEntry>? phrases,
     int? currentVotingIndex,
-    List<String?>? votes,
+    List<List<String>>? votes,
   }) {
-    return IconaStoryState(
+    return HistoriconicaState(
       phase: phase ?? this.phase,
       icons: icons ?? this.icons,
       phrases: phrases ?? this.phrases,
@@ -47,13 +47,41 @@ class IconaStoryState {
 
   PhraseEntry? get currentVotingPhrase =>
       currentVotingIndex < phrases.length ? phrases[currentVotingIndex] : null;
+
+  List<String> get currentPhraseVotes =>
+      currentVotingIndex < votes.length ? votes[currentVotingIndex] : [];
+
+  Map<String, int> get correctGuessesPerPlayer {
+    final result = <String, int>{};
+    for (final alias in allAliases) {
+      result[alias] = 0;
+    }
+    for (var i = 0; i < phrases.length; i++) {
+      final author = phrases[i].alias;
+      if (i < votes.length) {
+        final correct = votes[i].where((v) => v == author).length;
+        result[author] = (result[author] ?? 0) + correct;
+      }
+    }
+    return result;
+  }
+
+  List<String> get winners {
+    final scores = correctGuessesPerPlayer;
+    if (scores.isEmpty) return [];
+    final minScore = scores.values.reduce((a, b) => a < b ? a : b);
+    return scores.entries
+        .where((e) => e.value == minScore)
+        .map((e) => e.key)
+        .toList();
+  }
 }
 
-class IconaStoryNotifier extends Notifier<IconaStoryState> {
+class HistoriconicaNotifier extends Notifier<HistoriconicaState> {
   static const int _iconCount = 6;
 
   @override
-  IconaStoryState build() => const IconaStoryState();
+  HistoriconicaState build() => const HistoriconicaState();
 
   void startGame() {
     final rng = Random();
@@ -71,7 +99,7 @@ class IconaStoryNotifier extends Notifier<IconaStoryState> {
         .map((k) => MapEntry(k, kAllIcons[k]!))
         .toList();
 
-    state = IconaStoryState(
+    state = HistoriconicaState(
       phase: GamePhase.showingIcons,
       icons: picked,
     );
@@ -87,7 +115,7 @@ class IconaStoryNotifier extends Notifier<IconaStoryState> {
     state = state.copyWith(
       phrases: [
         ...state.phrases,
-        PhraseEntry(phrase: phrase.trim(), alias: alias.trim())
+        PhraseEntry(phrase: phrase.trim(), alias: alias.trim()),
       ],
       phase: GamePhase.showingIcons,
     );
@@ -99,16 +127,27 @@ class IconaStoryNotifier extends Notifier<IconaStoryState> {
       phrases: shuffled,
       phase: GamePhase.voting,
       currentVotingIndex: 0,
-      votes: List.filled(shuffled.length, null),
+      votes: List.generate(shuffled.length, (_) => []),
     );
   }
 
-  void castVote(String alias) {
-    final updatedVotes = [...state.votes];
-    updatedVotes[state.currentVotingIndex] = alias;
+  void addVote(String alias) {
+    final updatedVotes = state.votes.map((v) => [...v]).toList();
+    updatedVotes[state.currentVotingIndex].add(alias);
+    state = state.copyWith(votes: updatedVotes);
+  }
+
+  void removeVote(String alias) {
+    final updatedVotes = state.votes.map((v) => [...v]).toList();
+    final current = updatedVotes[state.currentVotingIndex];
+    final idx = current.lastIndexOf(alias);
+    if (idx >= 0) current.removeAt(idx);
+    state = state.copyWith(votes: updatedVotes);
+  }
+
+  void nextPhrase() {
     final nextIndex = state.currentVotingIndex + 1;
     state = state.copyWith(
-      votes: updatedVotes,
       currentVotingIndex: nextIndex,
       phase: nextIndex >= state.phrases.length
           ? GamePhase.results
@@ -116,10 +155,10 @@ class IconaStoryNotifier extends Notifier<IconaStoryState> {
     );
   }
 
-  void reset() => state = const IconaStoryState();
+  void reset() => state = const HistoriconicaState();
 }
 
-final iconaStoryProvider =
-    NotifierProvider<IconaStoryNotifier, IconaStoryState>(
-  IconaStoryNotifier.new,
+final historiconicaProvider =
+    NotifierProvider<HistoriconicaNotifier, HistoriconicaState>(
+  HistoriconicaNotifier.new,
 );

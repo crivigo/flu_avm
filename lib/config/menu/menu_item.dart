@@ -46,7 +46,7 @@ const appMenuItems = <MenuItem>[
     icon: Icons.punch_clock,
   ),
   MenuItem(
-    titulus: 'IconaStory',
+    titulus: 'Histori\u00f3nica',
     subtitulus: 'Adivina la frase con iconos',
     link: '/iconastory',
     icon: Icons.auto_stories_outlined,
