@@ -1,4 +1,5 @@
 ﻿import 'package:flu_avm/presentation/providers/iconastory_provider.dart';
+import 'package:flu_avm/presentation/providers/saved_historiconicas_provider.dart';
 import 'package:flu_avm/presentation/screens/iconastory/saved_historiconicas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,6 +77,17 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
         GamePhase.results => _ResultsView(
             state: state,
             onReset: notifier.reset,
+            onSave: () {
+              ref
+                  .read(savedHistoriconicasProvider.notifier)
+                  .save(state.icons, state.phrases);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Historia guardada'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
           ),
       },
     );
@@ -410,8 +422,13 @@ class _VotingView extends StatelessWidget {
 class _ResultsView extends StatelessWidget {
   final HistoriconicaState state;
   final VoidCallback onReset;
+  final VoidCallback onSave;
 
-  const _ResultsView({required this.state, required this.onReset});
+  const _ResultsView({
+    required this.state,
+    required this.onReset,
+    required this.onSave,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -570,6 +587,12 @@ class _ResultsView extends StatelessWidget {
           }),
           const SizedBox(height: 8),
           FilledButton.icon(
+            onPressed: onSave,
+            icon: const Icon(Icons.bookmark_add_outlined),
+            label: const Text('Guardar historia'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
             onPressed: onReset,
             icon: const Icon(Icons.replay),
             label: const Text('Nueva partida'),

@@ -50,6 +50,16 @@ class SavedHistoriconicasNotifier
     ];
   }
 
+  void save(List<MapEntry<String, IconData>> icons, List<PhraseEntry> phrases) {
+    final entry = SavedHistoriconica(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      savedAt: DateTime.now(),
+      icons: icons,
+      phrases: phrases,
+    );
+    state = [entry, ...state];
+  }
+
   void delete(String id) {
     state = state.where((s) => s.id != id).toList();
   }
