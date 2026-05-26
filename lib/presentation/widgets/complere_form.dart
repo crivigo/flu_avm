@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flu_avm/config/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

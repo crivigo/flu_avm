@@ -1,4 +1,5 @@
 ﻿import 'package:flu_avm/presentation/providers/iconastory_provider.dart';
+import 'package:flu_avm/presentation/screens/iconastory/saved_historiconicas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,14 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
         ],
       ),
       body: switch (state.phase) {
-        GamePhase.start => _StartView(onStart: notifier.startGame),
+        GamePhase.start => _StartView(
+            onStart: notifier.startGame,
+            onViewSaved: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const SavedHistoriconicasScreen(),
+              ),
+            ),
+          ),
         GamePhase.showingIcons => _ShowingIconsView(
             state: state,
             onAddPhrase: () {
@@ -95,7 +103,8 @@ class _IconsRow extends StatelessWidget {
 
 class _StartView extends StatelessWidget {
   final VoidCallback onStart;
-  const _StartView({required this.onStart});
+  final VoidCallback onViewSaved;
+  const _StartView({required this.onStart, required this.onViewSaved});
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +141,12 @@ class _StartView extends StatelessWidget {
             onPressed: onStart,
             icon: const Icon(Icons.casino_outlined),
             label: const Text('Empezar partida'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: onViewSaved,
+            icon: const Icon(Icons.bookmark_outline),
+            label: const Text('Historiónicas guardadas'),
           ),
         ],
       ),
