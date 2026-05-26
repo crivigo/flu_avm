@@ -39,10 +39,16 @@ const appMenuItems = <MenuItem>[
     link: '/request',
     icon: Icons.catching_pokemon
   ),
-   MenuItem(
+  MenuItem(
     titulus: 'Iconacos',
     subtitulus: 'Mi menu item',
     link: '/iconacos',
-    icon: Icons.punch_clock
+    icon: Icons.punch_clock,
+  ),
+  MenuItem(
+    titulus: 'IconaStory',
+    subtitulus: 'Adivina la frase con iconos',
+    link: '/iconastory',
+    icon: Icons.auto_stories_outlined,
   ),
 ];

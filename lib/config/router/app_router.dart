@@ -40,5 +40,9 @@ final appRouter = GoRouter(
       path: '/iconacos',
       builder: (context, state) => IconacosScreen(),
     ),
+    GoRoute(
+      path: '/iconastory',
+      builder: (context, state) => IconaStoryScreen(),
+    ),
   ]
 ); 
