@@ -1,4 +1,6 @@
-﻿import 'package:flu_avm/presentation/providers/iconastory_provider.dart';
+﻿import 'dart:ui';
+
+import 'package:flu_avm/presentation/providers/iconastory_provider.dart';
 import 'package:flu_avm/presentation/providers/saved_historiconicas_provider.dart';
 import 'package:flu_avm/presentation/screens/iconastory/saved_historiconicas_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ class IconaStoryScreen extends ConsumerStatefulWidget {
 }
 
 class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
+  static const _deepGreen = Color(0xFF0B5D49);
   final _phraseController = TextEditingController();
   final _aliasController = TextEditingController();
 
@@ -25,79 +28,139 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final baseTheme = Theme.of(context);
+    final historionicaTheme = ThemeData(
+      useMaterial3: true,
+      brightness: baseTheme.brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _deepGreen,
+        brightness: baseTheme.brightness,
+      ),
+      textTheme: baseTheme.textTheme,
+    );
     final state = ref.watch(historiconicaProvider);
     final notifier = ref.read(historiconicaProvider.notifier);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Histori\u00f3nica',
-          style: GoogleFonts.anton(fontSize: 22, letterSpacing: 1),
-        ),
-        actions: [
-          if (state.phase != GamePhase.start)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Nueva partida',
-              onPressed: notifier.reset,
-            ),
-        ],
-      ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/ImagenFondo.jpg',
-            fit: BoxFit.cover,
+    return Theme(
+      data: historionicaTheme,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: historionicaTheme.colorScheme.primaryContainer,
+          foregroundColor: historionicaTheme.colorScheme.onPrimaryContainer,
+          title: Text(
+            'Histori\u00f3nica',
+            style: GoogleFonts.anton(fontSize: 22, letterSpacing: 1),
           ),
-          switch (state.phase) {
-            GamePhase.start => _StartView(
-                onStart: notifier.startGame,
-                onViewSaved: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SavedHistoriconicasScreen(),
+          actions: [
+            if (state.phase != GamePhase.start)
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                tooltip: 'Nueva partida',
+                onPressed: notifier.reset,
+              ),
+          ],
+        ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/images/ImagenFondo.jpg',
+              fit: BoxFit.cover,
+            ),
+            if (state.phase != GamePhase.start)
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.14),
                   ),
                 ),
               ),
-            GamePhase.showingIcons => _ShowingIconsView(
-                state: state,
-                onAddPhrase: () {
-                  _phraseController.clear();
-                  _aliasController.clear();
-                  notifier.startAddingPhrase();
-                },
-                onFinish: notifier.finishWriting,
-              ),
-            GamePhase.addingPhrase => _AddPhraseView(
-                phraseController: _phraseController,
-                aliasController: _aliasController,
-                icons: state.icons,
-                onSave: (phrase, alias) => notifier.savePhrase(phrase, alias),
-                onCancel: notifier.cancelAddingPhrase,
-              ),
-            GamePhase.voting => _VotingView(
-                state: state,
-                onAddVote: notifier.addVote,
-                onRemoveVote: notifier.removeVote,
-                onNext: notifier.nextPhrase,
-              ),
-            GamePhase.results => _ResultsView(
-                state: state,
-                onReset: notifier.reset,
-                onSave: () {
-                  ref
-                      .read(savedHistoriconicasProvider.notifier)
-                      .save(state.icons, state.phrases);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Historia guardada'),
-                      duration: Duration(seconds: 2),
+            switch (state.phase) {
+              GamePhase.start => _StartView(
+                  onStart: notifier.startGame,
+                  onViewSaved: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const SavedHistoriconicasScreen(),
                     ),
-                  );
-                },
-              ),
-          },
-        ],
+                  ),
+                ),
+              GamePhase.showingIcons => _ReadableGameLayer(
+                  child: _ShowingIconsView(
+                    state: state,
+                    onAddPhrase: () {
+                      _phraseController.clear();
+                      _aliasController.clear();
+                      notifier.startAddingPhrase();
+                    },
+                    onFinish: notifier.finishWriting,
+                  ),
+                ),
+              GamePhase.addingPhrase => _ReadableGameLayer(
+                  child: _AddPhraseView(
+                    phraseController: _phraseController,
+                    aliasController: _aliasController,
+                    icons: state.icons,
+                    onSave: (phrase, alias) => notifier.savePhrase(phrase, alias),
+                    onCancel: notifier.cancelAddingPhrase,
+                  ),
+                ),
+              GamePhase.voting => _ReadableGameLayer(
+                  child: _VotingView(
+                    state: state,
+                    onAddVote: notifier.addVote,
+                    onRemoveVote: notifier.removeVote,
+                    onNext: notifier.nextPhrase,
+                  ),
+                ),
+              GamePhase.results => _ReadableGameLayer(
+                  child: _ResultsView(
+                    state: state,
+                    onReset: notifier.reset,
+                    onSave: () {
+                      ref
+                          .read(savedHistoriconicasProvider.notifier)
+                          .save(state.icons, state.phrases);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Historia guardada'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            },
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReadableGameLayer extends StatelessWidget {
+  final Widget child;
+
+  const _ReadableGameLayer({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: child,
+        ),
       ),
     );
   }
@@ -137,10 +200,69 @@ class _StartView extends StatelessWidget {
         children: [
           const Icon(Icons.auto_stories_outlined, size: 80),
           const SizedBox(height: 20),
-          Text(
-            'Histori\u00f3nica',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.anton(fontSize: 40, letterSpacing: 2),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SizedBox(
+              height: 70,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0),
+                          Colors.black.withValues(alpha: 0.18),
+                          Colors.black.withValues(alpha: 0.18),
+                          Colors.black.withValues(alpha: 0),
+                        ],
+                        stops: const [0, 0.22, 0.78, 1],
+                      ),
+                    ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Colors.black.withValues(alpha: 0),
+                          Colors.black.withValues(alpha: 0.15),
+                          Colors.black.withValues(alpha: 0.15),
+                          Colors.black.withValues(alpha: 0),
+                        ],
+                        stops: const [0, 0.18, 0.82, 1],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      'Histori\u00f3nica',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.anton(
+                        fontSize: 40,
+                        letterSpacing: 2,
+                        shadows: const [
+                          Shadow(
+                            blurRadius: 10,
+                            color: Colors.black45,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           Container(
@@ -165,6 +287,16 @@ class _StartView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              backgroundColor:
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.4,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
             onPressed: onViewSaved,
             icon: const Icon(Icons.bookmark_outline),
             label: const Text('Historiónicas guardadas'),

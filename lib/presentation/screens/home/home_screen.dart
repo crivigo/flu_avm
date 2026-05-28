@@ -48,28 +48,67 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Row(
-                children: const [
+                children: [
                   Expanded(
-                    child: Image(
-                      image: AssetImage('assets/images/movil.png'),
-                      fit: BoxFit.contain,
-                      height: 80,
+                    child: ColorFiltered(
+                      colorFilter: estTenebrisModus
+                          ? const ColorFilter.matrix([
+                              -1, 0, 0, 0, 255,
+                              0, -1, 0, 0, 255,
+                              0, 0, -1, 0, 255,
+                              0, 0, 0, 1, 0,
+                            ])
+                          : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.dst,
+                            ),
+                      child: const Image(
+                        image: AssetImage('assets/images/movil.png'),
+                        fit: BoxFit.contain,
+                        height: 80,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Image(
-                      image: AssetImage('assets/images/puntos.png'),
-                      fit: BoxFit.contain,
-                      height: 80,
+                    child: ColorFiltered(
+                      colorFilter: estTenebrisModus
+                          ? const ColorFilter.matrix([
+                              -1, 0, 0, 0, 255,
+                              0, -1, 0, 0, 255,
+                              0, 0, -1, 0, 255,
+                              0, 0, 0, 1, 0,
+                            ])
+                          : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.dst,
+                            ),
+                      child: const Image(
+                        image: AssetImage('assets/images/puntos.png'),
+                        fit: BoxFit.contain,
+                        height: 80,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Image(
-                      image: AssetImage('assets/images/servidor.png'),
-                      fit: BoxFit.contain,
-                      height: 80,
+                    child: ColorFiltered(
+                      colorFilter: estTenebrisModus
+                          ? const ColorFilter.matrix([
+                              -1, 0, 0, 0, 255,
+                              0, -1, 0, 0, 255,
+                              0, 0, -1, 0, 255,
+                              0, 0, 0, 1, 0,
+                            ])
+                          : const ColorFilter.mode(
+                              Colors.transparent,
+                              BlendMode.dst,
+                            ),
+                      child: const Image(
+                        image: AssetImage('assets/images/servidor.png'),
+                        fit: BoxFit.contain,
+                        height: 80,
+                      ),
                     ),
                   ),
                 ],
