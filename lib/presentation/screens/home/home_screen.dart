@@ -43,6 +43,34 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              Row(
+                children: const [
+                  Expanded(
+                    child: Image(
+                      image: AssetImage('assets/images/movil.png'),
+                      fit: BoxFit.contain,
+                      height: 80,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Image(
+                      image: AssetImage('assets/images/puntos.png'),
+                      fit: BoxFit.contain,
+                      height: 80,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Image(
+                      image: AssetImage('assets/images/servidor.png'),
+                      fit: BoxFit.contain,
+                      height: 80,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 32),
               // Botón Comenzar
               FilledButton.icon(
