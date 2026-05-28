@@ -117,8 +117,8 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
                   child: _ResultsView(
                     state: state,
                     onReset: notifier.reset,
-                    onSave: () {
-                      ref
+                    onSave: () async {
+                      await ref
                           .read(savedHistoriconicasProvider.notifier)
                           .save(state.icons, state.phrases);
                       ScaffoldMessenger.of(context).showSnackBar(

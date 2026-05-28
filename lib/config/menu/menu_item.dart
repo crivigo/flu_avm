@@ -41,7 +41,7 @@ const appMenuItems = <MenuItem>[
   ),
   MenuItem(
     titulus: 'Iconacos',
-    subtitulus: 'Mi menu item',
+    subtitulus: 'Visualiza todos los iconos',
     link: '/iconacos',
     icon: Icons.punch_clock,
   ),

@@ -53,7 +53,9 @@ class SavedHistoriconicasScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed == true) notifier.delete(id);
+    if (confirmed == true) {
+      await notifier.delete(id);
+    }
   }
 }
 
