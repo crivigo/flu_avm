@@ -3,9 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:flu_avm/presentation/screens/screens.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/home',
   
   routes: [
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomeScreen(),
+    ),
     GoRoute(
       path: '/',
       builder: (context, state) => DomusScreen(),
