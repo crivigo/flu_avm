@@ -43,53 +43,62 @@ class _IconaStoryScreenState extends ConsumerState<IconaStoryScreen> {
             ),
         ],
       ),
-      body: switch (state.phase) {
-        GamePhase.start => _StartView(
-            onStart: notifier.startGame,
-            onViewSaved: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const SavedHistoriconicasScreen(),
-              ),
-            ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/ImagenFondo.jpg',
+            fit: BoxFit.cover,
           ),
-        GamePhase.showingIcons => _ShowingIconsView(
-            state: state,
-            onAddPhrase: () {
-              _phraseController.clear();
-              _aliasController.clear();
-              notifier.startAddingPhrase();
-            },
-            onFinish: notifier.finishWriting,
-          ),
-        GamePhase.addingPhrase => _AddPhraseView(
-            phraseController: _phraseController,
-            aliasController: _aliasController,
-            icons: state.icons,
-            onSave: (phrase, alias) => notifier.savePhrase(phrase, alias),
-            onCancel: notifier.cancelAddingPhrase,
-          ),
-        GamePhase.voting => _VotingView(
-            state: state,
-            onAddVote: notifier.addVote,
-            onRemoveVote: notifier.removeVote,
-            onNext: notifier.nextPhrase,
-          ),
-        GamePhase.results => _ResultsView(
-            state: state,
-            onReset: notifier.reset,
-            onSave: () {
-              ref
-                  .read(savedHistoriconicasProvider.notifier)
-                  .save(state.icons, state.phrases);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Historia guardada'),
-                  duration: Duration(seconds: 2),
+          switch (state.phase) {
+            GamePhase.start => _StartView(
+                onStart: notifier.startGame,
+                onViewSaved: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const SavedHistoriconicasScreen(),
+                  ),
                 ),
-              );
-            },
-          ),
-      },
+              ),
+            GamePhase.showingIcons => _ShowingIconsView(
+                state: state,
+                onAddPhrase: () {
+                  _phraseController.clear();
+                  _aliasController.clear();
+                  notifier.startAddingPhrase();
+                },
+                onFinish: notifier.finishWriting,
+              ),
+            GamePhase.addingPhrase => _AddPhraseView(
+                phraseController: _phraseController,
+                aliasController: _aliasController,
+                icons: state.icons,
+                onSave: (phrase, alias) => notifier.savePhrase(phrase, alias),
+                onCancel: notifier.cancelAddingPhrase,
+              ),
+            GamePhase.voting => _VotingView(
+                state: state,
+                onAddVote: notifier.addVote,
+                onRemoveVote: notifier.removeVote,
+                onNext: notifier.nextPhrase,
+              ),
+            GamePhase.results => _ResultsView(
+                state: state,
+                onReset: notifier.reset,
+                onSave: () {
+                  ref
+                      .read(savedHistoriconicasProvider.notifier)
+                      .save(state.icons, state.phrases);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Historia guardada'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+          },
+        ],
+      ),
     );
   }
 }
