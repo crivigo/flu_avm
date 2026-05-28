@@ -49,8 +49,10 @@ class SavedHistoriconica {
         )
         .toList();
 
-    final decodedPhrases = (json['phrases'] as List<dynamic>? ?? <dynamic>[])
-        .whereType<Map<String, dynamic>>()
+    final rawPhrases = (json['phrases'] as List<dynamic>? ?? <dynamic>[]);
+    final decodedPhrases = rawPhrases
+        .whereType<Map>()
+        .map((p) => Map<String, dynamic>.from(p))
         .map(
           (p) => PhraseEntry(
             phrase: (p['phrase'] ?? '').toString(),
@@ -94,7 +96,8 @@ class SavedHistoriconicasNotifier
       if (decoded is! List) return;
 
       final loaded = decoded
-          .whereType<Map<String, dynamic>>()
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
           .map(SavedHistoriconica.fromJson)
           .toList();
 

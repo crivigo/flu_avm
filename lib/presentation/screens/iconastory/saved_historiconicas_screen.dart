@@ -5,29 +5,45 @@ import 'package:google_fonts/google_fonts.dart';
 
 class SavedHistoriconicasScreen extends ConsumerWidget {
   const SavedHistoriconicasScreen({super.key});
+  static const _deepGreen = Color(0xFF0B5D49);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final baseTheme = Theme.of(context);
+    final historionicaTheme = ThemeData(
+      useMaterial3: true,
+      brightness: baseTheme.brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _deepGreen,
+        brightness: baseTheme.brightness,
+      ),
+      textTheme: baseTheme.textTheme,
+    );
     final saved = ref.watch(savedHistoriconicasProvider);
     final notifier = ref.read(savedHistoriconicasProvider.notifier);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Histori\u00f3nicas guardadas',
-          style: GoogleFonts.anton(fontSize: 18, letterSpacing: 1),
+    return Theme(
+      data: historionicaTheme,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: historionicaTheme.colorScheme.primaryContainer,
+          foregroundColor: historionicaTheme.colorScheme.onPrimaryContainer,
+          title: Text(
+            'Histori\u00f3nicas guardadas',
+            style: GoogleFonts.anton(fontSize: 18, letterSpacing: 1),
+          ),
         ),
-      ),
-      body: saved.isEmpty
-          ? _EmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: saved.length,
-              itemBuilder: (context, i) => _SavedCard(
-                entry: saved[i],
-                onDelete: () => _confirmDelete(context, notifier, saved[i].id),
+        body: saved.isEmpty
+            ? _EmptyState()
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: saved.length,
+                itemBuilder: (context, i) => _SavedCard(
+                  entry: saved[i],
+                  onDelete: () => _confirmDelete(context, notifier, saved[i].id),
+                ),
               ),
-            ),
+      ),
     );
   }
 
@@ -69,7 +85,7 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.auto_stories_outlined,
             size: 72,
-            color: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           Text(
